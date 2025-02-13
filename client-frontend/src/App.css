@@ -1,0 +1,27 @@
+#main-container {
+  display: flex;
+  flex-direction: row;
+}
+
+#chat-container {
+  display: flex;
+  flex-direction: column;
+  width: 80vw;
+  height: 100vh;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
+
+#connected-users {
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 20vw;
+  border-right: 2px solid black;
+}
+
+input {
+  width: 30%;
+}
