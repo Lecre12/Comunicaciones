@@ -27,9 +27,10 @@ function App() {
 
     socket.on("private_message", (msg) => {
       if(Array.isArray(msg) && msg.every(m => m.sender && m.content && m.send_time)){
+        setMessages(() => [])
         msg.forEach(restoredMessage => {
           console.log(restoredMessage.sender + ": " + restoredMessage.content);
-          setMessages(() => [restoredMessage.sender + ": " + restoredMessage.content]);
+          setMessages((prev) => [...prev, restoredMessage.sender + ": " + restoredMessage.content]);
         });
       }
     });
