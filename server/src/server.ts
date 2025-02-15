@@ -26,10 +26,10 @@ HandlerDB.createTableIfNotExists("grupal_chat", [
 
 app.use(cors());
 
-let connectedUsers: User[] = [new User("Chat Grupal", "0.0.0.0.0")];
+let connectedUsers: User[] = [new User("Chat Grupal", "0.0.0.0.0", "")];
 io.on("connection", (socket) => {
   console.log(`Usuario conectado: ${socket.id} con ip: ${socket.handshake.address}`);
-  connectedUsers.push(new User(`Maquina ${connectedUsers.length}`, socket.handshake.address))
+  connectedUsers.push(new User(`Maquina ${connectedUsers.length}`, socket.handshake.address, socket.id))
 
   socket.on("message", (data: string) => {
     console.log("Mensaje recibido:", data);
@@ -41,8 +41,16 @@ io.on("connection", (socket) => {
             console.log(user.getIp());
         })
         io.emit("message", connectedUsers);
+    }else if(data == "-restore chat"){
+
+      console.log("Recuperando chat...");
+      if(senderUser?.getAlias())
+      io.to(senderUser?.getAlias()).emit("private_message", HandlerDB.getConversationFromChat("grupal_chat", 25));
+    
     }else{
         console.log("Esto es un mensaje para el grupo, " + data);
+        if(senderUser?.getIp())
+        HandlerDB.saveMessage("grupal_chat", senderUser?.getIp(), data);
         io.emit("message", (senderUser ? senderUser.getName() : "Desconocido") + ": " + data);
     }
     

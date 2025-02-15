@@ -29,7 +29,14 @@ class HandlerDB{
     }
 
     public static saveMessage(chat: string, sender: string, message: string){
+        const command : string = `INSERT INTO ${chat} (sender, content) VALUES ('${sender}', '${message}');`;
+        HandlerDB.getDB().exec(command);
+    }
 
+    public static getConversationFromChat(chat: string, numberOfMessages: number){
+        const command : string = `SELECT * FROM ${chat} ORDER BY send_time DESC LIMIT ${numberOfMessages}`
+        const stmt = HandlerDB.getDB().prepare(command);
+        return stmt.all();
     }
 
 }

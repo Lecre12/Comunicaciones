@@ -1,10 +1,12 @@
 export default class User{
     private name: string;
     private ip: string;
+    private alias: string;
 
-    constructor(name: string, ip: string){
+    constructor(name: string, ip: string, alias: string){
         this.name = name;
         this.ip = ip;
+        this.alias = alias;
     }
 
     public getIp(){
@@ -21,5 +23,8 @@ export default class User{
 
     public setIp(ip: string){
         this.ip = ip;
+    }
+    public getAlias(){
+        return this.alias;
     }
 }

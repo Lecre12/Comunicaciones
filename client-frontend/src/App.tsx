@@ -17,7 +17,7 @@ function App() {
     socket.on("message", (msg) => {
 
       if(Array.isArray(msg) && msg.every(m => m.name && m.ip)){
-        const usersArray = msg.map(m => new User(m.name, m.ip));
+        const usersArray = msg.map(m => new User(m.name, m.ip, ""));
         setUsers(usersArray);
       }else{
         console.log(msg);
@@ -25,10 +25,24 @@ function App() {
       }
     });
 
+    socket.on("private_message", (msg) => {
+      if(Array.isArray(msg) && msg.every(m => m.sender && m.content && m.send_time)){
+        msg.forEach(restoredMessage => {
+          console.log(restoredMessage.sender + ": " + restoredMessage.content);
+          setMessages(() => [restoredMessage.sender + ": " + restoredMessage.content]);
+        });
+      }
+    });
+
     return () => {
       socket.off("message");
     };
   }, []);
+
+  socket.on("connect", () =>{
+    console.log("Pidiendo historial de chat");
+    socket.emit("message", "-restore chat");
+  });
 
   // Enviar mensaje al servidor
   const sendMessage = () => {
