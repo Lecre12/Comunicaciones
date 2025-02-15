@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
-import Connected_users from "./components/connected-users";
+import Connected_users from "./components/Connected-users";
 import User from "../../shared/users/user";
 
 // Conectar con el servidor
@@ -38,6 +38,13 @@ function App() {
     }
   };
 
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      const button = document.getElementById("send-button") as HTMLButtonElement;
+      button.click();
+    }
+  };
+
   return (
     <div id="main-container">
       <div id="connected-users">
@@ -45,17 +52,20 @@ function App() {
       </div>
       <div id="chat-container">
         <h1>Chat App</h1>
-        <div>
+        <div id="message-container">
           {messages.map((msg, index) => (
             <p key={index}>{msg}</p>
           ))}
         </div>
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <button onClick={sendMessage}>Enviar</button>
+        <div id="input-container">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
+          />
+          <button onClick={sendMessage} id="send-button">Enviar</button>
+        </div>
       </div>
     </div>
   );

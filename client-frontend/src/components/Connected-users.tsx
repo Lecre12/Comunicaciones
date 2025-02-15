@@ -13,9 +13,9 @@ function Connected_users({ userList }: UserListProps){
     }
       return(
       <>
-        <div>
-            <h2>Connnected users:</h2>
-            <button onClick={reloadUsers}>Reload</button>
+        <div id="header-connected-users">
+            <h2 id="title-header">Connnected users:</h2>
+            <button id="button-header" onClick={reloadUsers}>Reload</button>
         </div>
         
         {userList.map((user, index)=>{

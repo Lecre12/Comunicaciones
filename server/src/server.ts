@@ -4,6 +4,8 @@ import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
 import User from "../../shared/users/user"
+import HandlerDB from "./db-handler/db-handler"
+import DbAtribute from "./types/db-atribute";
 
 dotenv.config();
 
@@ -15,6 +17,13 @@ const io = new Server(server, {
   },
 });
 
+HandlerDB.createTableIfNotExists("grupal_chat", [
+  new DbAtribute("sender", "STRING", false, undefined),
+  new DbAtribute("content", "STRING", false, undefined),
+  new DbAtribute("send_time", "DATETIME", false, "CURRENT_TIMESTAMP")
+], "sender, send_time");
+
+
 app.use(cors());
 
 let connectedUsers: User[] = [new User("Chat Grupal", "0.0.0.0.0")];
@@ -24,6 +33,8 @@ io.on("connection", (socket) => {
 
   socket.on("message", (data: string) => {
     console.log("Mensaje recibido:", data);
+    const senderUser = connectedUsers.find(user => user.getIp() === socket.handshake.address);
+
     if(data === "-get connected_users"){
         console.log("Consiguiendo usuarios conectados: \n");
         connectedUsers.forEach(user => {
@@ -32,7 +43,7 @@ io.on("connection", (socket) => {
         io.emit("message", connectedUsers);
     }else{
         console.log("Esto es un mensaje para el grupo, " + data);
-        io.emit("message", data); // Reenvía el mensaje a todos los clientes
+        io.emit("message", (senderUser ? senderUser.getName() : "Desconocido") + ": " + data);
     }
     
     data = "";

@@ -3,6 +3,12 @@ a {
     margin: 2% auto;
 }
 
-h2 {
+#header-connected-users{
     text-align: center;
+    display: grid;
+    grid-template-columns: fit-content fit-content;
+}
+
+#button-header{
+    grid-column: 1;
 }

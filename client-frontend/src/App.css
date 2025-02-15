@@ -13,6 +13,23 @@
   align-items: center;
 }
 
+#chat-container > h1{
+  height: 10%;
+  width: 100%;
+}
+
+#chat-container > #message-container{
+  height: 80%;
+  width: 80%;
+  overflow: auto;
+  overflow-wrap: break-word;
+}
+
+#chat-container > #input-container{
+  height: 10%;
+  width: 100%;
+}
+
 #connected-users {
   align-self: start;
   display: flex;
@@ -24,4 +41,5 @@
 
 input {
   width: 30%;
+  margin-right: 5%;
 }
