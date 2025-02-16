@@ -5,7 +5,7 @@ import Connected_users from "./components/Connected-users";
 import User from "../../shared/users/user";
 
 // Conectar con el servidor
-export const socket = io("http://192.168.68.101:3001");
+export const socket = io(import.meta.env.SERVER_URL);
 
 function App() {
   const [messages, setMessages] = useState<string[]>([]);
