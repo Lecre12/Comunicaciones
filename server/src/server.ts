@@ -32,50 +32,46 @@ HandlerDB.createTableIfNotExists("alias_table", [
 app.use(cors());
 
 let connectedUsers: User[] = [new User("Chat Grupal", "0.0.0.0.0", "")];
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log(`Usuario conectado: ${socket.id} con ip: ${socket.handshake.address}`);
   HandlerDB.initialiceAlias(socket.handshake.address);
-  const userNameConnected = (HandlerDB.getALiasFromIp(socket.handshake.address));
+  const userNameConnected = (await HandlerDB.getALiasFromIp(socket.handshake.address));
   console.log(userNameConnected);
   if(userNameConnected){
     connectedUsers.push(new User(userNameConnected, socket.handshake.address, socket.id));
   }
 
-
-  socket.on("message", (data: string) => {
+  socket.on("message", async (data: string) => {
     console.log("Mensaje recibido:", data);
     const senderUser = connectedUsers.find(user => user.getIp() === socket.handshake.address);
 
     if(data === "-get connected_users"){
-        console.log("Consiguiendo usuarios conectados: \n");
-        connectedUsers.forEach(user => {
-            console.log(user.getIp());
-        })
-        io.emit("message", connectedUsers);
+      sendConnectedUsers();
     }else if(data == "-restore chat"){
 
       console.log("Recuperando chat...");
       if(senderUser?.getAlias())
-      io.to(senderUser?.getAlias()).emit("private_message", HandlerDB.getConversationFromChat("grupal_chat", 25));
+      io.to(senderUser?.getAlias()).emit("private_message", await HandlerDB.getConversationFromChat("grupal_chat", 25));
     
     }else{
         console.log("Esto es un mensaje para el grupo, " + data);
         if(senderUser?.getIp())
-        HandlerDB.saveMessage("grupal_chat", senderUser?.getIp(), data);
+        await HandlerDB.saveMessage("grupal_chat", senderUser?.getIp(), data);
         io.emit("message", (senderUser ? senderUser.getName() : "Desconocido") + ": " + data);
     }
     
     data = "";
   });
 
-  socket.on("alias_save", (alias: string) => {
+  socket.on("alias_save", async (alias: string) => {
     if(alias){
-      HandlerDB.saveAlias(`alias_table`, alias, socket.handshake.address);
+      await HandlerDB.saveAlias(`alias_table`, alias, socket.handshake.address);
       connectedUsers.forEach(user => {
         if(user.getIp() == socket.handshake.address){
           user.setName(alias);
         }
       });
+      sendConnectedUsers();
     }
     
   });
@@ -90,4 +86,12 @@ io.on("connection", (socket) => {
 const PORT = Number(process.env.PORT) || 3001;
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Servidor corriendo`);
-});
+});});
+
+function sendConnectedUsers(){
+  console.log("Consiguiendo usuarios conectados: \n");
+  connectedUsers.forEach(user => {
+      console.log(user.getIp());
+  })
+  io.emit("message", connectedUsers);
+}

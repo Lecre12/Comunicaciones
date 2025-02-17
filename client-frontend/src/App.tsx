@@ -5,8 +5,15 @@ import Connected_users from "./components/Connected-users";
 import User from "../../shared/users/user";
 
 // Conectar con el servidor
-//console.log(import.meta.env.VITE_SERVER_URL);
-export const socket = io(import.meta.env.VITE_SERVER_URL);
+export const socket = io(import.meta.env.VITE_SERVER_URL, {
+  reconnectionAttempts: 3,
+  timeout: 5000
+});
+
+socket.on("connect_error", (error) => {
+  console.error("❌ Error de conexión:", error.message);
+  alert("❌ Error de conexión: " + error.message);
+});
 
 function App() {
   const [messages, setMessages] = useState<string[]>([]);
