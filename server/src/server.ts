@@ -23,13 +23,24 @@ HandlerDB.createTableIfNotExists("grupal_chat", [
   new DbAtribute("send_time", "DATETIME", false, "CURRENT_TIMESTAMP")
 ], "sender, send_time");
 
+HandlerDB.createTableIfNotExists("alias_table", [
+  new DbAtribute("name", "STRING", false, "'Desconocido'"),
+  new DbAtribute("ip", "STRING", false, undefined)
+], "ip");
+
 
 app.use(cors());
 
 let connectedUsers: User[] = [new User("Chat Grupal", "0.0.0.0.0", "")];
 io.on("connection", (socket) => {
   console.log(`Usuario conectado: ${socket.id} con ip: ${socket.handshake.address}`);
-  connectedUsers.push(new User(`Maquina ${connectedUsers.length}`, socket.handshake.address, socket.id))
+  HandlerDB.initialiceAlias(socket.handshake.address);
+  const userNameConnected = (HandlerDB.getALiasFromIp(socket.handshake.address));
+  console.log(userNameConnected);
+  if(userNameConnected){
+    connectedUsers.push(new User(userNameConnected, socket.handshake.address, socket.id));
+  }
+
 
   socket.on("message", (data: string) => {
     console.log("Mensaje recibido:", data);
@@ -55,6 +66,18 @@ io.on("connection", (socket) => {
     }
     
     data = "";
+  });
+
+  socket.on("alias_save", (alias: string) => {
+    if(alias){
+      HandlerDB.saveAlias(`alias_table`, alias, socket.handshake.address);
+      connectedUsers.forEach(user => {
+        if(user.getIp() == socket.handshake.address){
+          user.setName(alias);
+        }
+      });
+    }
+    
   });
 
   socket.on("disconnect", () => {

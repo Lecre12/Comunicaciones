@@ -43,3 +43,14 @@ input {
   width: 30%;
   margin-right: 5%;
 }
+
+#header-chat{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: center;
+}
+
+#alias-container{
+  align-content: center;
+}

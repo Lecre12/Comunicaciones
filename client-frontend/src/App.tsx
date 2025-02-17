@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
 import Connected_users from "./components/Connected-users";
 import User from "../../shared/users/user";
 
 // Conectar con el servidor
-export const socket = io(import.meta.env.SERVER_URL);
+//console.log(import.meta.env.VITE_SERVER_URL);
+export const socket = io(import.meta.env.VITE_SERVER_URL);
 
 function App() {
   const [messages, setMessages] = useState<string[]>([]);
   const [message, setMessage] = useState("");
+  const [alias, setAlias] = useState("");
   const [users, setUsers] = useState<User[]>([]);
 
   // Escuchar mensajes del servidor
@@ -26,11 +28,11 @@ function App() {
     });
 
     socket.on("private_message", (msg) => {
-      if(Array.isArray(msg) && msg.every(m => m.sender && m.content && m.send_time)){
+      if(Array.isArray(msg) && msg.every(m => m.sender && m.content && m.send_time && m.alias)){
         setMessages(() => [])
         msg.forEach(restoredMessage => {
-          console.log(restoredMessage.sender + ": " + restoredMessage.content);
-          setMessages((prev) => [...prev, restoredMessage.sender + ": " + restoredMessage.content]);
+          console.log(restoredMessage.alias + ": " + restoredMessage.content);
+          setMessages((prev) => [...prev, restoredMessage.alias + ": " + restoredMessage.content]);
         });
       }
     });
@@ -53,6 +55,13 @@ function App() {
     }
   };
 
+  const saveAlias = () => {
+    if(alias){
+      socket.emit("alias_save", alias);
+      setAlias("");
+    }
+  };
+
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       const button = document.getElementById("send-button") as HTMLButtonElement;
@@ -66,7 +75,17 @@ function App() {
         <Connected_users userList={users}/>
       </div>
       <div id="chat-container">
-        <h1>Chat App</h1>
+        <div id="header-chat">
+          <h1>Chat App</h1>
+          <div id="alias-container">
+            <input
+              type="text"
+              value={alias}
+              onChange={(e: { target: { value: SetStateAction<string>; }; }) => setAlias(e.target.value)}
+            />
+            <button onClick={saveAlias}>Guardar alias</button>
+          </div>
+        </div>
         <div id="message-container">
           {messages.map((msg, index) => (
             <p key={index}>{msg}</p>

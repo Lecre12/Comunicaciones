@@ -34,10 +34,36 @@ class HandlerDB{
     }
 
     public static getConversationFromChat(chat: string, numberOfMessages: number){
-        const command : string = `SELECT * FROM ${chat} ORDER BY send_time DESC LIMIT ${numberOfMessages}`
+        const command: string = `
+        SELECT c.*, a.name AS alias
+        FROM ${chat} AS c
+        LEFT JOIN alias_table AS a ON c.sender = a.ip
+        ORDER BY c.send_time DESC
+        LIMIT ?;
+    `;
         const stmt = HandlerDB.getDB().prepare(command);
-        return stmt.all();
+        return stmt.all(numberOfMessages);
     }
+
+    public static saveAlias(tableName: string, alias: string, ip: string){
+        const command : string = `INSERT INTO ${tableName} (name, ip) VALUES ('${alias}', '${ip}') ON CONFLICT(ip) DO UPDATE SET name = excluded.name;`
+        console.log(command);
+        HandlerDB.getDB().exec(command);
+    }
+
+    public static getALiasFromIp(ip: string) : string | null{
+        const command: string = `SELECT name FROM alias_table WHERE ip = ?;`;
+        const stmt = HandlerDB.getDB().prepare(command);
+        const result = stmt.get(ip) as {name : string} | undefined;
+
+        return result ? result.name : null;
+    }
+
+    public static initialiceAlias(ip: string){
+        const command : string = `INSERT OR IGNORE INTO alias_table (name, ip) VALUES ('Desconocido', '${ip}')`;
+        console.log(command);
+        HandlerDB.getDB().exec(command);
+    }   
 
 }
 

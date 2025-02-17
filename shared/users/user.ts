@@ -1,12 +1,12 @@
 export default class User{
     private name: string;
     private ip: string;
-    private alias: string;
+    private connectionAlias: string;
 
     constructor(name: string, ip: string, alias: string){
         this.name = name;
         this.ip = ip;
-        this.alias = alias;
+        this.connectionAlias = alias;
     }
 
     public getIp(){
@@ -25,6 +25,6 @@ export default class User{
         this.ip = ip;
     }
     public getAlias(){
-        return this.alias;
+        return this.connectionAlias;
     }
 }
