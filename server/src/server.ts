@@ -86,7 +86,7 @@ io.on("connection", async (socket) => {
 const PORT = Number(process.env.PORT) || 3001;
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Servidor corriendo`);
-});});
+});
 
 function sendConnectedUsers(){
   console.log("Consiguiendo usuarios conectados: \n");
