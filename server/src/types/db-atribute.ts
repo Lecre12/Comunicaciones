@@ -3,12 +3,15 @@ class DbAtribute{
     private type: string;
     private canNull: boolean;
     private defaultValue: string | undefined;
+    private autoincrement?: boolean;
 
-    constructor(name: string, type: string, canNull: boolean, defaultValue: string | undefined){
+    constructor(name: string, type: string, canNull: boolean, defaultValue: string | undefined, autoincrement?: boolean){
         this.name = name;
         this.type = type;
         this.canNull = canNull;
         this.defaultValue = defaultValue;
+        if(autoincrement)
+            this.autoincrement = autoincrement;
     }
 
     public getName(){
@@ -34,6 +37,14 @@ class DbAtribute{
             return "";
         }
         
+    }
+
+    public getAutoincrement(){
+        if(this.autoincrement){
+            return ` PRIMARY KEY AUTOINCREMENT`;
+        }else{
+            return "";
+        }
     }
 }
 

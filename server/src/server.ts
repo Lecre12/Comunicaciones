@@ -17,16 +17,7 @@ const io = new Server(server, {
   },
 });
 
-HandlerDB.createTableIfNotExists("grupal_chat", [
-  new DbAtribute("sender", "STRING", false, undefined),
-  new DbAtribute("content", "STRING", false, undefined),
-  new DbAtribute("send_time", "DATETIME", false, "CURRENT_TIMESTAMP")
-], "sender, send_time");
-
-HandlerDB.createTableIfNotExists("alias_table", [
-  new DbAtribute("name", "STRING", false, "'Desconocido'"),
-  new DbAtribute("ip", "STRING", false, undefined)
-], "ip");
+HandlerDB.initDataBase();
 
 
 app.use(cors());
