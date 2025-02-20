@@ -1,8 +1,56 @@
+/* Estilos para el contenedor principal */
 #main-container {
   display: flex;
   flex-direction: row;
+  height: 100vh; /* Asegura que ocupe toda la altura de la pantalla */
 }
 
+/* Estilos para el formulario de inicio de sesión */
+#login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centra verticalmente */
+  align-items: center; /* Centra horizontalmente */
+  width: 100vw; /* Ocupa todo el ancho de la pantalla */
+  height: 100vh; /* Ocupa toda la altura de la pantalla */
+  background-color: #f0f0f0; /* Color de fondo opcional */
+}
+
+#login-container h1 {
+  margin-bottom: 20px; /* Espacio entre el título y el input */
+  font-size: 2rem; /* Tamaño del título */
+}
+
+#alias-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Espacio entre el input y el botón */
+}
+
+#alias-container input {
+  width: 200px; /* Ancho del input */
+  padding: 10px; /* Espaciado interno */
+  font-size: 1rem; /* Tamaño del texto */
+  border: 1px solid #ccc; /* Borde del input */
+  border-radius: 5px; /* Bordes redondeados */
+}
+
+#alias-container button {
+  padding: 10px 20px; /* Espaciado interno */
+  font-size: 1rem; /* Tamaño del texto */
+  background-color: #646cff; /* Color de fondo */
+  color: white; /* Color del texto */
+  border: none; /* Sin borde */
+  border-radius: 5px; /* Bordes redondeados */
+  cursor: pointer; /* Cambia el cursor al pasar el mouse */
+}
+
+#alias-container button:hover {
+  background-color: #535bf2; /* Cambia el color al pasar el mouse */
+}
+
+/* Estilos para el chat (cuando el usuario está logueado) */
 #chat-container {
   display: flex;
   flex-direction: column;
@@ -13,19 +61,19 @@
   align-items: center;
 }
 
-#chat-container > h1{
+#chat-container > h1 {
   height: 10%;
   width: 100%;
 }
 
-#chat-container > #message-container{
+#chat-container > #message-container {
   height: 80%;
   width: 80%;
   overflow: auto;
   overflow-wrap: break-word;
 }
 
-#chat-container > #input-container{
+#chat-container > #input-container {
   height: 10%;
   width: 100%;
 }
@@ -44,13 +92,13 @@ input {
   margin-right: 5%;
 }
 
-#header-chat{
+#header-chat {
   display: flex;
   flex-direction: row;
   width: 100%;
   justify-content: center;
 }
 
-#alias-container{
+#alias-container {
   align-content: center;
 }

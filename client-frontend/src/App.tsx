@@ -10,32 +10,27 @@ export const socket = io(import.meta.env.VITE_SERVER_URL, {
   timeout: 5000
 });
 
-socket.on("connect_error", (error) => {
-  console.error("❌ Error de conexión:", error.message);
-  alert("❌ Error de conexión: " + error.message);
-});
-
 function App() {
   const [messages, setMessages] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [alias, setAlias] = useState("");
   const [users, setUsers] = useState<User[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Nuevo estado para controlar si el usuario ha ingresado su nombre
 
   // Escuchar mensajes del servidor
   useEffect(() => {
     socket.on("message", (msg) => {
-
-      if(Array.isArray(msg) && msg.every(m => m.name && m.ip)){
+      if (Array.isArray(msg) && msg.every(m => m.name && m.ip)) {
         const usersArray = msg.map(m => new User(m.name, m.ip, ""));
         setUsers(usersArray);
-      }else{
+      } else {
         console.log(msg);
         setMessages((prev) => [...prev, msg]);
       }
     });
 
     socket.on("private_message", (msg) => {
-      if(Array.isArray(msg) && msg.every(m => m.sender && m.content && m.send_time && m.alias)){
+      if (Array.isArray(msg) && msg.every(m => m.sender && m.content && m.send_time && m.alias)) {
         setMessages(() => [])
         msg.forEach(restoredMessage => {
           console.log(restoredMessage.alias + ": " + restoredMessage.content);
@@ -49,7 +44,7 @@ function App() {
     };
   }, []);
 
-  socket.on("connect", () =>{
+  socket.on("connect", () => {
     console.log("Pidiendo historial de chat");
     socket.emit("message", "-restore chat");
   });
@@ -63,8 +58,9 @@ function App() {
   };
 
   const saveAlias = () => {
-    if(alias){
+    if (alias) {
       socket.emit("alias_save", alias);
+      setIsLoggedIn(true); // Cambiar el estado a true para mostrar el chat
       setAlias("");
     }
   };
@@ -78,36 +74,45 @@ function App() {
 
   return (
     <div id="main-container">
-      <div id="connected-users">
-        <Connected_users userList={users}/>
-      </div>
-      <div id="chat-container">
-        <div id="header-chat">
-          <h1>Chat App</h1>
+      {!isLoggedIn ? (
+        <div id="login-container">
+          <h1>Bienvenido al Chat</h1>
           <div id="alias-container">
             <input
               type="text"
               value={alias}
               onChange={(e: { target: { value: SetStateAction<string>; }; }) => setAlias(e.target.value)}
+              placeholder="Ingresa tu nombre de usuario"
             />
-            <button onClick={saveAlias}>Guardar alias</button>
+            <button onClick={saveAlias}>Entrar al chat</button>
           </div>
         </div>
-        <div id="message-container">
-          {messages.map((msg, index) => (
-            <p key={index}>{msg}</p>
-          ))}
-        </div>
-        <div id="input-container">
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyPress}
-          />
-          <button onClick={sendMessage} id="send-button">Enviar</button>
-        </div>
-      </div>
+      ) : (
+        <>
+          <div id="connected-users">
+            <Connected_users userList={users} />
+          </div>
+          <div id="chat-container">
+            <div id="header-chat">
+              <h1>Chat App</h1>
+            </div>
+            <div id="message-container">
+              {messages.map((msg, index) => (
+                <p key={index}>{msg}</p>
+              ))}
+            </div>
+            <div id="input-container">
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={handleKeyPress}
+              />
+              <button onClick={sendMessage} id="send-button">Enviar</button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
