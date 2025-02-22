@@ -1,16 +1,12 @@
 export default class User{
     private name: string;
-    private ip: string;
-    private connectionAlias: string;
+    private socketId: string;
+    private userId: number;
 
-    constructor(name: string, ip: string, alias: string){
+    constructor(name: string, socketId: string, userId: number){
         this.name = name;
-        this.ip = ip;
-        this.connectionAlias = alias;
-    }
-
-    public getIp(){
-        return this.ip;
+        this.socketId = socketId;
+        this.userId = userId;
     }
 
     public getName(){
@@ -21,10 +17,10 @@ export default class User{
         this.name = name;
     }
 
-    public setIp(ip: string){
-        this.ip = ip;
+    public getSocketId(){
+        return this.socketId;
     }
-    public getAlias(){
-        return this.connectionAlias;
+    public getUserId(){
+        return this.userId;
     }
 }

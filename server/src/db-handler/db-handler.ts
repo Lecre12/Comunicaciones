@@ -3,6 +3,7 @@ import path from "path";
 import DbAtribute from "../types/db-atribute";
 import Semaphore from "../types/semaphore"
 import ForeignKey from "../types/db-foreign-key";
+import Message from "../../../shared/message/message";
 
 class HandlerDB{
     private static instance: ReturnType<typeof Database> | null = null;
@@ -11,7 +12,7 @@ class HandlerDB{
 
     constructor(){}
 
-    public static getDB(){
+    private static getDB(){
         if(this.instance){
             return this.instance;
         }else{
@@ -105,63 +106,80 @@ class HandlerDB{
 
     }
 
-    public static async saveMessage(chat: string, sender: string, message: string){
-        const command : string = `INSERT INTO ${chat} (sender, content) VALUES ('${sender}', '${message}');`;
+    public static async saveMessage(senderId: number, chatId: number, message: string){
+        const command : string = `INSERT INTO mensaje (user_id, conver_id, content) VALUES (${senderId}, ${chatId}, '${message}');`;
         await this.semaphore.acquire();
-        try{
-            HandlerDB.getDB().exec(command);
-        }catch(error: any){
-            if(error.code === "SQLITE_CONSTRAINT_PRIMARYKEY"){
-                await new Promise(res => setTimeout(res, 10));
-                this.saveMessage(chat, sender, message);
-            }else{
-                console.error("❌ Error al insertar mensaje:", error.code);
-            }
-        }
-        
+        HandlerDB.getDB().exec(command);
         this.semaphore.release();
     }
 
-    public static async getConversationFromChat(chat: string, numberOfMessages: number){
-        const command: string = `
-        SELECT c.*, a.name AS alias
-        FROM ${chat} AS c
-        LEFT JOIN alias_table AS a ON c.sender = a.ip
-        ORDER BY c.send_time DESC
-        LIMIT ?;
-    `;
+    public static async getConversationFromChat(chatId: number, numberOfMessages: number){
+        const command: string = `SELECT * FROM mensaje JOIN users_identification ON mensaje.user_id = users_identification.id WHERE mensaje.conver_id = ${chatId} ORDER BY mensaje.send_time DESC LIMIT ?`;
         await this.semaphore.acquire();
         const stmt = HandlerDB.getDB().prepare(command);
-        const result = stmt.all(numberOfMessages);
+        const result: Message[] = stmt.all(numberOfMessages) as Message[];
         this.semaphore.release();
         return result;
     }
 
-    public static async saveAlias(tableName: string, alias: string, ip: string){
-        const command : string = `INSERT INTO ${tableName} (name, ip) VALUES ('${alias}', '${ip}') ON CONFLICT(ip) DO UPDATE SET name = excluded.name;`
+    public static async saveAlias(alias: string){
+        const command : string = `INSERT INTO users_identification (alias) VALUES ('${alias}');`;
         console.log(command);
         await this.semaphore.acquire();
         HandlerDB.getDB().exec(command);
         this.semaphore.release();
     }
 
-    public static async getALiasFromIp(ip: string): Promise<string>{
-        const command: string = `SELECT name FROM alias_table WHERE ip = ?;`;
+    public static updateAlias(id: number, alias: string){
+        const command = `UPDATE users_identification SET alias = ${alias} WHERE id = ${id}`;
+        console.log(command);
+        HandlerDB.getDB().exec(command);
+    }
+
+    public static async getALiasFromId(id: number): Promise<string>{
+        const command: string = `SELECT alias FROM users_identification WHERE id = ?;`;
         await this.semaphore.acquire();
         const stmt = HandlerDB.getDB().prepare(command);
-        const result = stmt.get(ip) as {name : string} | undefined;
+        const result = stmt.get(id) as {alias : string} | undefined;
         this.semaphore.release();
 
-        return result ? result.name : "";
+        return result ? result.alias : "";
+    } 
+    
+    public static getIdFromAlias(alias: string){
+        const command = `SELECT id FROM users_identification WHERE alias = '${alias}'`;
+        const stmt = HandlerDB.getDB().prepare(command);
+        const result = stmt.get() as {id: number} | undefined;
+        return result ? result.id : -1;
     }
 
-    public static async initialiceAlias(ip: string){
-        const command : string = `INSERT OR IGNORE INTO alias_table (name, ip) VALUES ('Desconocido', '${ip}')`;
-        await this.semaphore.acquire();
+    public static newConversation(conversationName: string, participantsIds: number[]){
+        const command: string = `INSERT INTO conversation (name) VALUES ('${conversationName}');`;
         console.log(command);
         HandlerDB.getDB().exec(command);
-        this.semaphore.release();
-    }   
+
+
+        this.setParticipants(this.getChatIdFromName(conversationName), participantsIds);
+        
+        return this.getChatIdFromName(conversationName);
+    }
+
+    public static getChatIdFromName(chatName: string){
+
+        const command: string = `SELECT id FROM conversation WHERE name = ?;`;
+        const stmt = HandlerDB.getDB().prepare(command);
+        const result = stmt.get(chatName) as {id : number} | undefined;
+
+        return result ? result.id : -1;
+
+    }
+
+    public static setParticipants(chatId: number, participantsIds: number[]){
+        participantsIds.forEach((userId) => {
+            const command = `INSERT OR IGNORE INTO participant (conver_id, user_id) VALUES (${chatId}, ${userId});`;
+            this.getDB().exec(command);
+        });
+    }
 
 }
 

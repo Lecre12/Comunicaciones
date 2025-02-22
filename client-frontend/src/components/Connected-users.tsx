@@ -1,16 +1,33 @@
+import { SetStateAction } from "react";
 import User from "../../../shared/users/user"
 import { socket } from "../App";
 import "./Connected-users.css"
 
 type UserListProps = {
     userList: User[];
+    myUser: User;
   };
 
-function Connected_users({ userList }: UserListProps){
+function Connected_users({ userList, myUser }: UserListProps){
 
     function reloadUsers() {
-        socket.emit("message", "-get connected_users".trim());
+        socket.emit("-get_users", "");
     }
+
+    function setConversationName(event: React.MouseEvent<HTMLButtonElement>){
+      const strongElement = event.currentTarget.querySelector("strong");
+      if (strongElement) {
+        console.log("ID del strong:", strongElement.id);
+        const text = strongElement.textContent;
+        const myUserName = myUser.getName();
+        const myUserId = myUser.getUserId();
+        if(text){
+          const names: string[] = [text, myUserName];
+          socket.emit("set-conversation", `_${myUserId}_${strongElement.id}_`, names);
+        }
+      }
+    }
+
       return(
       <>
         <div id="header-connected-users">
@@ -19,7 +36,7 @@ function Connected_users({ userList }: UserListProps){
         </div>
         
         {userList.map((user, index)=>{
-            return <a><strong key={index}>{user.getName()}</strong></a>
+            return <button onClick={setConversationName} key={index}><strong id={`${user.getUserId()}`}>{user.getName()}</strong></button>
         })}
       </>);
 }
