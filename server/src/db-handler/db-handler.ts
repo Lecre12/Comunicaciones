@@ -189,6 +189,13 @@ class HandlerDB{
         return result.map(row => row.user_id);
     }
 
+    public static getAllUsers(){
+        const command = `SELECT * FROM users_identification`;
+        const stmt = HandlerDB.getDB().prepare(command);
+        const result = stmt.all() as {id: number, alias:string}[];
+        return result;
+    }
+
 }
 
 export default HandlerDB;

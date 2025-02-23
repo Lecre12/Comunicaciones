@@ -21,7 +21,8 @@ function App() {
   const [messages, setMessages] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [alias, setAlias] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<User[]>([]);
+  const [disconnectedUsers, setDisconnectedUsers] = useState<User[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Nuevo estado para controlar si el usuario ha ingresado su nombre
   const actualConversationIdRef = useRef(-1);
   const [actualConversationId, setConversation] = useState(-1);
@@ -54,7 +55,12 @@ function App() {
 
     socket.on("-connected_users", (usersData: any[]) => {
       const formattedUsers = usersData.map(user => new User(user.name, user.socketId, user.userId));
-      setUsers(formattedUsers);
+      setConnectedUsers(formattedUsers);
+    });
+
+    socket.on("-disconnected_users", (usersData: any[]) => {
+      const formattedUsers = usersData.map(user => new User(user.name, user.socketId, user.userId));
+      setDisconnectedUsers(formattedUsers);
     });
 
     socket.on("conver_id", (conver_id: number) => {
@@ -136,7 +142,7 @@ function App() {
       ) : (
         <>
           <div id="connected-users">
-            <Connected_users userList={users} myUser={myUser}/>
+            <Connected_users userList={connectedUsers} myUser={myUser} disconnectedUserList={disconnectedUsers}/>
           </div>
           <div id="chat-container">
             <div id="header-chat">

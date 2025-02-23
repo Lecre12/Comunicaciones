@@ -12,3 +12,7 @@ a {
 #button-header{
     grid-column: 1;
 }
+
+.button-disconnected-user {
+    color: red;
+}

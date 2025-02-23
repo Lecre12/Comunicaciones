@@ -5,9 +5,10 @@ import "./Connected-users.css"
 type UserListProps = {
     userList: User[];
     myUser: User;
+    disconnectedUserList: User[];
   };
 
-function Connected_users({ userList, myUser }: UserListProps){
+function Connected_users({ userList, myUser, disconnectedUserList }: UserListProps){
 
     function reloadUsers() {
         socket.emit("-get_users", "");
@@ -36,6 +37,9 @@ function Connected_users({ userList, myUser }: UserListProps){
         
         {userList.map((user, index)=>{
             return <button onClick={setConversationName} key={index}><strong id={`${user.getUserId()}`}>{user.getName()}</strong></button>
+        })}
+        {disconnectedUserList.map((user, index)=>{
+            return <button onClick={setConversationName} key={index} className="button-disconnected-user"><strong id={`${user.getUserId()}`}>{user.getName()}</strong></button>
         })}
       </>);
 }

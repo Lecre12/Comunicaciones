@@ -5,7 +5,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import User from "../../shared/users/user"
 import HandlerDB from "./db-handler/db-handler"
-import { stringify } from "querystring";
 
 dotenv.config();
 
@@ -74,6 +73,7 @@ io.on("connection", async (socket) => {
         if(converId == -1){
           converId = await HandlerDB.newConversation(converName, participantsIds);
           io.to(socket.id).emit("conver_id", converId);
+          io.to(socket.id).emit("history_chat", []);
         }else{
           io.to(socket.id).emit("conver_id", converId);
           const historyMsgs = await HandlerDB.getConversationFromChat(converId, 25); 
@@ -89,6 +89,7 @@ io.on("connection", async (socket) => {
         }else{
           converId = HandlerDB.newConversation(conversationName, participantsIds);
           io.to(socket.id).emit("conver_id", converId);
+          io.to(socket.id).emit("history_chat", []);
         }
       }
     }  
@@ -119,6 +120,7 @@ io.on("connection", async (socket) => {
 
   socket.on("-get_users", () => {
     sendConnectedUsers();
+    sendDisconnectedUsers();
   });
 
   socket.on("disconnect", (reason) => {
@@ -139,6 +141,19 @@ function sendConnectedUsers(){
     console.log(user.getName());
   })
   io.emit("-connected_users", connectedUsers);
+}
+
+function sendDisconnectedUsers(){
+  console.log(`Consiguiendo usuarios desconectados`);
+  const rawUsers = HandlerDB.getAllUsers();
+  console.log(rawUsers);
+  const allUsersFromDb = Array.isArray(rawUsers) 
+    ? rawUsers.map(user => new User(user.alias, "", user.id)) 
+    : [];
+
+  console.log("Usuarios obtenidos:", allUsersFromDb);
+  const disconnectedUsers: User[] = allUsersFromDb.filter(user => !connectedUsers.some(connectedUser => connectedUser.getUserId() === user.getUserId()));
+  io.emit("-disconnected_users", disconnectedUsers);
 }
 
 function normalizeConversationId(id1: number, id2: number): string {
