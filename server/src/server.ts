@@ -15,6 +15,7 @@ const io = new Server(server, {
   cors: {
     origin: "*",
   },
+  maxHttpBufferSize: 1e3,
 });
 
 HandlerDB.initDataBase();
@@ -90,19 +91,6 @@ io.on("connection", async (socket) => {
           io.to(socket.id).emit("conver_id", converId);
         }
       }
-
-      /*if(await HandlerDB.getChatIdFromName(conversationName) != -1){
-        const converId = await HandlerDB.getChatIdFromName(conversationName);
-        io.to(socket.id).emit("conver_id", converId);
-        io.to(socket.id).emit("history_chat", await HandlerDB.getConversationFromChat(converId, 25));
-      }else if(converName && await HandlerDB.getChatIdFromName(converName) != -1){
-        const converId = await HandlerDB.getChatIdFromName(converName);
-        io.to(socket.id).emit("conver_id", converId);
-        io.to(socket.id).emit("history_chat", await HandlerDB.getConversationFromChat(converId, 25));
-      }else{
-        const converId = HandlerDB.newConversation(conversationName, participantsIds);
-        io.to(socket.id).emit("conver_id", converId);
-      }*/
     }  
   });
 
@@ -133,8 +121,8 @@ io.on("connection", async (socket) => {
     sendConnectedUsers();
   });
 
-  socket.on("disconnect", () => {
-    console.log(`Usuario desconectado: ${socket.id}`);
+  socket.on("disconnect", (reason) => {
+    console.log(`Usuario desconectado: ${socket.id} por: ${reason}`);
     const newArray = connectedUsers.filter(item => item.getSocketId() !== socket.id);
     connectedUsers = newArray;
   });

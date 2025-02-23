@@ -4,6 +4,7 @@ import "./App.css";
 import Connected_users from "./components/Connected-users";
 import User from "../../shared/users/user";
 import Message from "../../shared/message/message";
+const MAX_MESSAGE_LENGTH = 1e3;
 
 // Conectar con el servidor
 export const socket = io("wss://performing-robinson-firewire-lets.trycloudflare.com", {
@@ -38,10 +39,6 @@ function App() {
       if(actualConversationIdRef.current == converId){
         setMessages((prev) => [...prev, msg]);
       }
-    });
-
-    socket.on("private_message", (msg: Message[]) => {
-      
     });
 
     socket.on("history_chat", (msgs: Message[]) => {
@@ -80,6 +77,12 @@ function App() {
       socket.emit("-get_users", "");
     });
 
+    socket.on("disconnect", (reason) => {
+      console.warn("Desconectado del servidor:", reason);
+      alert("Se perdió la conexión con el servidor. Recargando...");
+      window.location.reload();
+    });
+
     return () => {
       socket.off("message");
       socket.off("private_message");
@@ -89,6 +92,10 @@ function App() {
 
   // Enviar mensaje al servidor
   const sendMessage = () => {
+    if(message.length >= MAX_MESSAGE_LENGTH){
+      alert(`No puedes sobrepasar ${MAX_MESSAGE_LENGTH} caracteres`);
+      return;
+    }
     if (message.trim()) {
       const myUserId = myUser.getUserId();
       socket.emit("message", message, myUserId, actualConversationIdRef.current);

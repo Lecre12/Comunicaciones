@@ -1,4 +1,3 @@
-import { SetStateAction } from "react";
 import User from "../../../shared/users/user"
 import { socket } from "../App";
 import "./Connected-users.css"
