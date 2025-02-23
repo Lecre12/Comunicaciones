@@ -4,6 +4,7 @@ import "./App.css";
 import Connected_users from "./components/Connected-users";
 import User from "../../shared/users/user";
 import Message from "../../shared/message/message";
+import Chat_name from "./components/Chat-name";
 const MAX_MESSAGE_LENGTH = 1e3;
 
 // Conectar con el servidor
@@ -18,6 +19,8 @@ export const socket = io("wss://performing-robinson-firewire-lets.trycloudflare.
 });*/
 
 function App() {
+  const messageContainerRef = useRef<HTMLDivElement>(null);
+  const [showUsers, setShowUsers] = useState(window.innerWidth >= 800);
   const [messages, setMessages] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [alias, setAlias] = useState("");
@@ -26,7 +29,27 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Nuevo estado para controlar si el usuario ha ingresado su nombre
   const actualConversationIdRef = useRef(-1);
   const [actualConversationId, setConversation] = useState(-1);
+  const [conversationName, setConversationName] = useState("");
   const [myUser, setMyUser] = useState(new User("", "", -1));
+
+  useEffect(() => {
+    const handleResize = () => {
+      setShowUsers(window.innerWidth > 800);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (messageContainerRef.current) {
+        messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+      }
+    }, 0);
+  }, [messages]);
 
   useEffect(() => {
     actualConversationIdRef.current = actualConversationId;
@@ -141,15 +164,18 @@ function App() {
         </div>
       ) : (
         <>
-          <div id="connected-users">
-            <Connected_users userList={connectedUsers} myUser={myUser} disconnectedUserList={disconnectedUsers}/>
+          <button id="toggle-users" onClick={() => setShowUsers(!showUsers)}>
+            ...
+          </button>
+          <div id="connected-users" style={{ display: showUsers ? "flex" : "none" }}>
+            <Connected_users userList={connectedUsers} myUser={myUser} disconnectedUserList={disconnectedUsers} fakeConversationName={setConversationName}/>
           </div>
           <div id="chat-container">
             <div id="header-chat">
-              <h1>Chat App</h1>
+              <Chat_name title={conversationName}/>
             </div>
-            <div id="message-container">
-              {messages.map((msg, index) => (
+            <div id="message-container" ref={messageContainerRef}>
+                {messages.map((msg, index) => (
                 <p key={index}>{msg}</p>
               ))}
             </div>

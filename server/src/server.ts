@@ -111,6 +111,9 @@ io.on("connection", async (socket) => {
       io.to(socket.id).emit("who_i_am", new User(alias, socket.id, newUserId));
     }
 
+    sendConnectedUsers();
+    sendDisconnectedUsers();
+
   });
 
   socket.on("-restore_chat", async (chatId: number) => {

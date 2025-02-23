@@ -1,18 +1,34 @@
-a {
-    cursor: pointer;
-    margin: 2% auto;
-}
-
 #header-connected-users{
     text-align: center;
     display: grid;
-    grid-template-columns: fit-content fit-content;
+    grid-template-columns:  fit-content fit-content;
 }
 
 #button-header{
-    grid-column: 1;
+    margin: auto;
+    grid-column: 2;
+    height: fit-content;
+
+    padding: 5% 10%;
+    background: transparent;
+}
+
+#users-container{
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
 }
 
 .button-disconnected-user {
     color: red;
+    align-self: center;
+    width: 60%;
+    margin: 1% 0;
+}
+
+.button-connected-user {
+    color: green;
+    align-self: center;
+    width: 60%;
+    margin: 1% 0;
 }

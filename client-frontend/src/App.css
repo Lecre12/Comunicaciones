@@ -1,56 +1,55 @@
-/* Estilos para el contenedor principal */
 #main-container {
   display: flex;
   flex-direction: row;
-  height: 100vh; /* Asegura que ocupe toda la altura de la pantalla */
+  height: 100vh;
 }
 
-/* Estilos para el formulario de inicio de sesión */
 #login-container {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Centra verticalmente */
-  align-items: center; /* Centra horizontalmente */
-  width: 100vw; /* Ocupa todo el ancho de la pantalla */
-  height: 100vh; /* Ocupa toda la altura de la pantalla */
-  background-color: #f0f0f0; /* Color de fondo opcional */
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: #242424;
 }
 
 #login-container h1 {
-  margin-bottom: 20px; /* Espacio entre el título y el input */
-  font-size: 2rem; /* Tamaño del título */
+  margin-bottom: 20px;
+  font-size: 2rem;
 }
 
 #alias-container {
   display: flex;
+  width: max-content;
   flex-direction: column;
   align-items: center;
-  gap: 10px; /* Espacio entre el input y el botón */
+  gap: 10px;
 }
 
 #alias-container input {
-  width: 200px; /* Ancho del input */
-  padding: 10px; /* Espaciado interno */
-  font-size: 1rem; /* Tamaño del texto */
-  border: 1px solid #ccc; /* Borde del input */
-  border-radius: 5px; /* Bordes redondeados */
+  width: 120%;
+  text-align: center;
+  padding: 10px;
+  font-size: 1rem; 
+  border: 1px solid #ccc; 
+  border-radius: 5px;
 }
 
 #alias-container button {
-  padding: 10px 20px; /* Espaciado interno */
-  font-size: 1rem; /* Tamaño del texto */
-  background-color: #646cff; /* Color de fondo */
-  color: white; /* Color del texto */
-  border: none; /* Sin borde */
-  border-radius: 5px; /* Bordes redondeados */
-  cursor: pointer; /* Cambia el cursor al pasar el mouse */
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #646cff; 
+  color: white;
+  border: none;
+  border-radius: 5px; 
+  cursor: pointer;
 }
 
 #alias-container button:hover {
-  background-color: #535bf2; /* Cambia el color al pasar el mouse */
+  background-color: #535bf2;
 }
 
-/* Estilos para el chat (cuando el usuario está logueado) */
 #chat-container {
   display: flex;
   flex-direction: column;
@@ -68,9 +67,28 @@
 
 #chat-container > #message-container {
   height: 80%;
-  width: 80%;
-  overflow: auto;
+  width: 98%;
+  padding: 0px 10%;
+  overflow-y:scroll;
   overflow-wrap: break-word;
+}
+
+#message-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+#message-container::-webkit-scrollbar-track {
+  background: #555; 
+  border-radius: 10px;
+}
+
+#message-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+#message-container::-webkit-scrollbar-thumb:hover {
+  background: #999;
 }
 
 #chat-container > #input-container {
@@ -79,12 +97,13 @@
 }
 
 #connected-users {
-  align-self: start;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 99vh;
   width: 20vw;
   border-right: 2px solid black;
+  background-color: solid #242424;
+  margin-bottom: 1vh;
 }
 
 input {
@@ -99,6 +118,37 @@ input {
   justify-content: center;
 }
 
-#alias-container {
-  align-content: center;
+#toggle-users {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  #chat-container {
+    width: 100vw;
+  }
+
+  #connected-users {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100vw;
+    height: 100vh;
+    background-color: #242424;
+  }
+
+  #toggle-users {
+    z-index: 1001;
+    display: block; 
+    position: absolute;
+    top: 7vh;
+    left: 4vw;
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
 }
