@@ -98,7 +98,17 @@ io.on("connection", async (socket) => {
   socket.on("identification", async (alias: string) => {
 
     const userIdConnected: number = (await HandlerDB.getIdFromAlias(alias));
+    let alreadyExists : boolean = false;
     
+    connectedUsers.forEach(user => {
+      if(user.getName() === alias){
+        alreadyExists = true;
+        io.to(socket.id).emit("-error", "Este usuario ya esta conectado desde otro dispositivo");
+      }
+    });
+
+    if(alreadyExists) return;
+
     if(userIdConnected != -1){
       console.log(`Usuario identificado y conectado como: ${userIdConnected}`);
       connectedUsers.push(new User(alias, socket.id, userIdConnected));

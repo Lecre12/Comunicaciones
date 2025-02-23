@@ -98,6 +98,7 @@ function App() {
     socket.on("who_i_am", (userData: any) => {
       const formattedUser = new User(userData.name, userData.socketId, userData.userId);
       setMyUser(formattedUser);
+      setIsLoggedIn(true);
     });
 
     socket.on("connect", () => {
@@ -110,6 +111,10 @@ function App() {
       console.warn("Desconectado del servidor:", reason);
       alert("Se perdió la conexión con el servidor. Recargando...");
       window.location.reload();
+    });
+
+    socket.on("-error", (error : string) => {
+      alert(error);
     });
 
     return () => {
@@ -135,7 +140,6 @@ function App() {
   const saveAlias = () => {
     if (alias) {
       socket.emit("identification", alias);
-      setIsLoggedIn(true); // Cambiar el estado a true para mostrar el chat
       setAlias("");
     }
   };
