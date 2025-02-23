@@ -28,9 +28,24 @@ io.on("connection", async (socket) => {
 
   socket.on("message", async (data: string, senderId: number, conversationId: number) => {
     console.log(`Mensaje para la conversacion: ${conversationId}, con mensaje: ${data}`);
+    if(conversationId == -1) return;
+
+    const participantsIds = await HandlerDB.getParticipantsByConversationId(conversationId);
+    console.log(participantsIds);
+
+    if(!participantsIds.includes(senderId)) return; // El usuario no tiene permitido enviar mensajes en este chat
+
+    console.log("Tiene permitido mandar mensajes al chat");
     const senderAlias = await HandlerDB.getALiasFromId(senderId);
     await HandlerDB.saveMessage(senderId, conversationId, data);
-    io.emit("message", (senderAlias? senderAlias : "Desconocido") + ": " + data);
+
+
+    connectedUsers.forEach((userCon) => {
+      if(participantsIds.includes(userCon.getUserId())){
+        console.log("MNandando mensaje a: " + userCon.getSocketId());
+        io.to(userCon.getSocketId()).emit("message", (senderAlias ||"Desconocido") + ": " + data, conversationId);
+      }
+    });
     data = "";
   });
 
@@ -53,25 +68,25 @@ io.on("connection", async (socket) => {
         converName = normalizeConversationId(id1, id2);
       }
 
-      console.log(converName);
-
       if(converName){
         let converId = await HandlerDB.getChatIdFromName(converName);
         if(converId == -1){
-          converId = HandlerDB.newConversation(converName, participantsIds);
+          converId = await HandlerDB.newConversation(converName, participantsIds);
           io.to(socket.id).emit("conver_id", converId);
         }else{
           io.to(socket.id).emit("conver_id", converId);
-          io.to(socket.id).emit("history_chat", await HandlerDB.getConversationFromChat(converId, 25));
+          const historyMsgs = await HandlerDB.getConversationFromChat(converId, 25); 
+          io.to(socket.id).emit("history_chat", historyMsgs);
         }
         
       }else{
-        if(await HandlerDB.getChatIdFromName(conversationName) != -1){
-          const converId = await HandlerDB.getChatIdFromName(conversationName);
+        let converId = await HandlerDB.getChatIdFromName(conversationName);
+        if(converId != -1){
           io.to(socket.id).emit("conver_id", converId);
-          io.to(socket.id).emit("history_chat", await HandlerDB.getConversationFromChat(converId, 25));
+          const historyMsgs = await HandlerDB.getConversationFromChat(converId, 25); 
+          io.to(socket.id).emit("history_chat", historyMsgs);
         }else{
-          const converId = HandlerDB.newConversation(conversationName, participantsIds);
+          converId = HandlerDB.newConversation(conversationName, participantsIds);
           io.to(socket.id).emit("conver_id", converId);
         }
       }
@@ -88,17 +103,7 @@ io.on("connection", async (socket) => {
         const converId = HandlerDB.newConversation(conversationName, participantsIds);
         io.to(socket.id).emit("conver_id", converId);
       }*/
-    }else{
-      let converName : string = "";
-
-      participantsIds.forEach((id) => {
-        converName += `_${id}_`;
-      });
-
-      const converId = HandlerDB.newConversation(`${converName}`, participantsIds);
-      io.to(socket.id).emit("conver_id", converId);
-    }
-    
+    }  
   });
 
   socket.on("identification", async (alias: string) => {
@@ -121,7 +126,7 @@ io.on("connection", async (socket) => {
 
   socket.on("-restore_chat", async (chatId: number) => {
     console.log("Recuperando chat...");
-    io.to(socket.id).emit("private_message", await HandlerDB.getConversationFromChat(chatId, 25));
+    io.to(socket.id).emit("history_chat", await HandlerDB.getConversationFromChat(chatId, 25));
   });
 
   socket.on("-get_users", () => {

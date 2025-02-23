@@ -1,4 +1,4 @@
-import { SetStateAction, useEffect, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
 import Connected_users from "./components/Connected-users";
@@ -6,7 +6,7 @@ import User from "../../shared/users/user";
 import Message from "../../shared/message/message";
 
 // Conectar con el servidor
-export const socket = io("wss://contains-stronger-nh-reviewing.trycloudflare.com", {
+export const socket = io("wss://performing-robinson-firewire-lets.trycloudflare.com", {
   reconnectionAttempts: 3,
   timeout: 5000
 });
@@ -22,27 +22,37 @@ function App() {
   const [alias, setAlias] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Nuevo estado para controlar si el usuario ha ingresado su nombre
+  const actualConversationIdRef = useRef(-1);
   const [actualConversationId, setConversation] = useState(-1);
   const [myUser, setMyUser] = useState(new User("", "", -1));
 
+  useEffect(() => {
+    actualConversationIdRef.current = actualConversationId;
+  }, [actualConversationId]);
 
   // Escuchar mensajes del servidor
   useEffect(() => {
-    socket.on("message", (msg) => {
-        console.log(msg);
+    socket.on("message", (msg: string, converId: number) => {
+      console.log(msg);
+      console.log(`mensaje de converId: ${converId} y estoy en conver: ${actualConversationIdRef.current}`);
+      if(actualConversationIdRef.current == converId){
         setMessages((prev) => [...prev, msg]);
+      }
     });
 
     socket.on("private_message", (msg: Message[]) => {
-      setMessages(() => []);
-      msg.forEach(restoredMessage => {
+      
+    });
+
+    socket.on("history_chat", (msgs: Message[]) => {
+      console.log(`He recibido un historial: ${msgs}`);
+      if(msgs){
+        setMessages(() => []);
+        msgs.forEach(restoredMessage => {
         console.log(restoredMessage.alias + ": " + restoredMessage.content);
         setMessages((prev) => [...prev, restoredMessage.alias + ": " + restoredMessage.content]);
       });
-    });
-
-    socket.on("history_chat", (msg) => {
-
+      }
     });
 
     socket.on("-connected_users", (usersData: any[]) => {
@@ -51,7 +61,12 @@ function App() {
     });
 
     socket.on("conver_id", (conver_id: number) => {
-      setConversation(conver_id);
+      if(conver_id == -1){
+        console.warn("Se ha recibido que estoy en el chat -1, revisa la logica del servidor");
+      }else{
+        setConversation(conver_id);
+        console.log("Actual conver: " + actualConversationIdRef.current);
+      }
     });
 
     socket.on("who_i_am", (userData: any) => {
@@ -76,7 +91,7 @@ function App() {
   const sendMessage = () => {
     if (message.trim()) {
       const myUserId = myUser.getUserId();
-      socket.emit("message", message, myUserId, actualConversationId);
+      socket.emit("message", message, myUserId, actualConversationIdRef.current);
       setMessage("");
     }
   };

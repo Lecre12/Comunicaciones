@@ -107,6 +107,7 @@ class HandlerDB{
     }
 
     public static async saveMessage(senderId: number, chatId: number, message: string){
+        if(chatId == -1) return;
         const command : string = `INSERT INTO mensaje (user_id, conver_id, content) VALUES (${senderId}, ${chatId}, '${message}');`;
         await this.semaphore.acquire();
         HandlerDB.getDB().exec(command);
@@ -114,7 +115,7 @@ class HandlerDB{
     }
 
     public static async getConversationFromChat(chatId: number, numberOfMessages: number){
-        const command: string = `SELECT * FROM mensaje JOIN users_identification ON mensaje.user_id = users_identification.id WHERE mensaje.conver_id = ${chatId} ORDER BY mensaje.send_time DESC LIMIT ?`;
+        const command: string = `SELECT * FROM mensaje JOIN users_identification ON mensaje.user_id = users_identification.id WHERE mensaje.conver_id = ${chatId} ORDER BY mensaje.send_time ASC LIMIT ?`;
         await this.semaphore.acquire();
         const stmt = HandlerDB.getDB().prepare(command);
         const result: Message[] = stmt.all(numberOfMessages) as Message[];
@@ -179,6 +180,13 @@ class HandlerDB{
             const command = `INSERT OR IGNORE INTO participant (conver_id, user_id) VALUES (${chatId}, ${userId});`;
             this.getDB().exec(command);
         });
+    }
+
+    public static getParticipantsByConversationId(chatId: number): number[]{
+        const command : string = `SELECT user_id FROM participant WHERE conver_id = ${chatId}`;
+        const stmt = HandlerDB.getDB().prepare(command);
+        const result = stmt.all() as {user_id: number}[];
+        return result.map(row => row.user_id);
     }
 
 }
