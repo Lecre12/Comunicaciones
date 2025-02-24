@@ -8,7 +8,7 @@ import Chat_name from "./components/Chat-name";
 const MAX_MESSAGE_LENGTH = 1e3;
 
 // Conectar con el servidor
-export const socket = io("wss://performing-robinson-firewire-lets.trycloudflare.com", {
+export const socket = io(import.meta.env.VITE_SERVER_URL, {
   reconnectionAttempts: 3,
   timeout: 5000
 });
