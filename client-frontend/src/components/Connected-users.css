@@ -21,6 +21,8 @@
 
 .button-disconnected-user {
     color: red;
+    display: flex;
+    justify-content: space-between;
     align-self: center;
     width: 60%;
     margin: 1% 0;
@@ -28,7 +30,31 @@
 
 .button-connected-user {
     color: green;
+    display: flex;
+    justify-content: space-between;
     align-self: center;
     width: 60%;
     margin: 1% 0;
+}
+
+#config-myuser-button{
+    background-color: transparent;
+    position: absolute;
+    right: 0;
+}
+
+#container-myuser{
+    position: relative;
+    width: 100%;
+    display: flex;
+}
+
+#myuser-button{
+    margin: 0 auto;
+}
+
+.img-user {
+    max-height: 20px;
+    width: auto;
+    border-radius: 50%;
 }

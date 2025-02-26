@@ -77,7 +77,8 @@ class HandlerDB{
 
         await HandlerDB.createTableIfNotExists("users_identification", [
             new DbAtribute("id", "INTEGER", false, undefined, true),
-            new DbAtribute("alias", "STRING", false, undefined)
+            new DbAtribute("alias", "STRING", false, undefined),
+            new DbAtribute("icon_name", "STRING", true, undefined)
         ], "id");
 
         await HandlerDB.createTableIfNotExists("conversation", [
@@ -193,7 +194,21 @@ class HandlerDB{
     public static getAllUsers(){
         const command = `SELECT * FROM users_identification`;
         const stmt = HandlerDB.getDB().prepare(command);
-        const result = stmt.all() as {id: number, alias:string}[];
+        const result = stmt.all() as {id: number, alias:string, icon_name: string | undefined}[];
+        return result;
+    }
+
+    public static updateUserIcon(userId: number, path: string){
+        const command = `UPDATE users_identification SET icon_name = '${path}' WHERE id = ${userId};`;
+        console.log(command);
+        this.getDB().exec(command);
+    }
+
+    public static getIcon(userId: number){
+        const command = `SELECT icon_name FROM users_identification WHERE id = ?;`;
+        console.log(command);
+        const stmt = HandlerDB.getDB().prepare(command);
+        const result = stmt.get(userId) as { icon_name: string | undefined };
         return result;
     }
 

@@ -5,13 +5,14 @@ import Connected_users from "./components/Connected-users";
 import User from "../../shared/users/user";
 import Message from "../../shared/message/message";
 import Chat_name from "./components/Chat-name";
-const MAX_MESSAGE_LENGTH = 1e3;
+const MAX_MESSAGE_LENGTH = 5e3;
 
 // Conectar con el servidor
 export const socket = io(import.meta.env.VITE_SERVER_URL, {
   reconnectionAttempts: 3,
   timeout: 5000
 });
+export const REAL_SERVER_URL = import.meta.env.VITE_REAL_SERVER_URL + "/";
 
 /*socket.on("connect_error", (error) => {
   console.error("❌ Error de conexión:", error.message);
@@ -77,12 +78,13 @@ function App() {
     });
 
     socket.on("-connected_users", (usersData: any[]) => {
-      const formattedUsers = usersData.map(user => new User(user.name, user.socketId, user.userId));
+      const formattedUsers = usersData.map(user => new User(user.name, user.socketId, user.userId, REAL_SERVER_URL + user.icon));
+      console.log(formattedUsers);
       setConnectedUsers(formattedUsers);
     });
 
     socket.on("-disconnected_users", (usersData: any[]) => {
-      const formattedUsers = usersData.map(user => new User(user.name, user.socketId, user.userId));
+      const formattedUsers = usersData.map(user => new User(user.name, user.socketId, user.userId, REAL_SERVER_URL + user.icon));
       setDisconnectedUsers(formattedUsers);
     });
 
@@ -96,7 +98,7 @@ function App() {
     });
 
     socket.on("who_i_am", (userData: any) => {
-      const formattedUser = new User(userData.name, userData.socketId, userData.userId);
+      const formattedUser = new User(userData.name, userData.socketId, userData.userId, REAL_SERVER_URL + userData.icon);
       setMyUser(formattedUser);
       setIsLoggedIn(true);
     });
@@ -116,6 +118,11 @@ function App() {
     socket.on("-error", (error : string) => {
       alert(error);
     });
+    socket.on("set_image", (data) => {
+      console.log("Recibi mi icono: " + data);
+      setMyUser((prevUser) => new User(prevUser.getName(), prevUser.getSocketId(), prevUser.getUserId(), REAL_SERVER_URL + data));
+      socket.emit("-get_users", "");
+    });
 
     return () => {
       socket.off("message");
@@ -123,6 +130,10 @@ function App() {
       socket.off("history_chat");
     };
   }, []);
+
+  useEffect(() => {
+    console.log("myUser actualizado:", myUser);
+  }, [myUser]);
 
   // Enviar mensaje al servidor
   const sendMessage = () => {

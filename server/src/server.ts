@@ -5,6 +5,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import User from "../../shared/users/user"
 import HandlerDB from "./db-handler/db-handler"
+import path from "path";
+import fs from "fs";
+
+const ALLOWED_TYPES = ["image/svg+xml", "image/png", "image/webp", "image/jpeg"];
 
 dotenv.config();
 
@@ -14,13 +18,14 @@ const io = new Server(server, {
   cors: {
     origin: "*",
   },
-  maxHttpBufferSize: 1e3,
+  maxHttpBufferSize: 50e3,
 });
 
 HandlerDB.initDataBase();
 
 
 app.use(cors());
+app.use("/uploads", express.static("uploads"));
 
 let connectedUsers: User[] = [];
 io.on("connection", async (socket) => {
@@ -111,8 +116,12 @@ io.on("connection", async (socket) => {
 
     if(userIdConnected != -1){
       console.log(`Usuario identificado y conectado como: ${userIdConnected}`);
-      connectedUsers.push(new User(alias, socket.id, userIdConnected));
-      io.to(socket.id).emit("who_i_am", new User(alias, socket.id, userIdConnected));
+      const icon = HandlerDB.getIcon(userIdConnected).icon_name;
+      console.log("EL icono de este tio es: " + icon);
+      connectedUsers.push(new User(alias, socket.id, userIdConnected, icon));
+      const sendUser = new User(alias, socket.id, userIdConnected, icon);
+      console.log(sendUser);
+      io.to(socket.id).emit("who_i_am", sendUser);
     }else{
       console.log(`Usuario no identificado previamente, añadiendo a db...`);
       await HandlerDB.saveAlias(alias);
@@ -136,6 +145,38 @@ io.on("connection", async (socket) => {
     sendDisconnectedUsers();
   });
 
+  socket.on("upload_image", (userId: number, fileData) => {
+    console.log(`Se ha recibido un archivo con nombre: ${fileData.name}`);
+    if (!ALLOWED_TYPES.includes(fileData.type)) {
+      console.log("❌ Archivo rechazado:", fileData.name);
+      return;
+    }
+    const extension = fileData.name.split('.').pop();
+
+    fileData.name = userId.toString() + `.${extension}`;
+    
+    const uploadDir = path.join(process.cwd(), "uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+
+    // Guardar el archivo en la carpeta "uploads"
+    const relativePath = path.join("uploads", fileData.name);
+    fs.writeFileSync(relativePath, Buffer.from(fileData.buffer));
+
+
+    console.log("✅ Archivo guardado en:", relativePath);
+    HandlerDB.updateUserIcon(userId, relativePath);
+    connectedUsers.forEach(user => {
+      if(user.getUserId() == userId){
+        user.setIcon(relativePath);
+      }
+    });
+
+    io.to(socket.id).emit("set_image", relativePath);
+
+  });
+
   socket.on("disconnect", (reason) => {
     console.log(`Usuario desconectado: ${socket.id} por: ${reason}`);
     const newArray = connectedUsers.filter(item => item.getSocketId() !== socket.id);
@@ -151,7 +192,7 @@ server.listen(PORT, "0.0.0.0", () => {
 function sendConnectedUsers(){
   console.log("Consiguiendo usuarios conectados: \n");
   connectedUsers.forEach(user => {
-    console.log(user.getName());
+    console.log(user);
   })
   io.emit("-connected_users", connectedUsers);
 }
@@ -161,7 +202,7 @@ function sendDisconnectedUsers(){
   const rawUsers = HandlerDB.getAllUsers();
   console.log(rawUsers);
   const allUsersFromDb = Array.isArray(rawUsers) 
-    ? rawUsers.map(user => new User(user.alias, "", user.id)) 
+    ? rawUsers.map(user => new User(user.alias, "", user.id, user.icon_name)) 
     : [];
 
   console.log("Usuarios obtenidos:", allUsersFromDb);
