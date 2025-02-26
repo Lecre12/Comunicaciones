@@ -196,5 +196,7 @@ pnpm-lock.yaml
 
 .vercel
 
+/server/uploads/
+
 
 *.tmp
