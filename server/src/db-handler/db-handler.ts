@@ -109,6 +109,7 @@ class HandlerDB{
     public static async saveMessage(senderId: number, chatId: number, message: string){
         if(chatId == -1) return;
         const command : string = `INSERT INTO mensaje (user_id, conver_id, content) VALUES (${senderId}, ${chatId}, '${message}');`;
+        console.log(command);
         await this.semaphore.acquire();
         HandlerDB.getDB().exec(command);
         this.semaphore.release();

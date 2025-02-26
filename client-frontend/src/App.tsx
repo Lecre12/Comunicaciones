@@ -189,8 +189,9 @@ function App() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={handleKeyPress}
+                disabled={actualConversationId === -1}
               />
-              <button onClick={sendMessage} id="send-button">Enviar</button>
+              <button onClick={sendMessage} id="send-button" disabled={actualConversationId === -1}>Enviar</button>
             </div>
           </div>
         </>

@@ -125,6 +125,13 @@ input {
 @media (max-width: 800px) {
   #chat-container {
     width: 100vw;
+    height: 100svh;
+  }
+  #login-container{
+    height: 100svh;
+  }
+  #main-container {
+    height: 100svh;
   }
 
   #connected-users {
@@ -134,7 +141,7 @@ input {
     left: 0;
     z-index: 1000;
     width: 100vw;
-    height: 100vh;
+    height: 100svh;
     background-color: #242424;
   }
 
@@ -151,4 +158,13 @@ input {
     cursor: pointer;
     border-radius: 5px;
   }
+}
+
+button:disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+input:disabled {
+  pointer-events: none;
+  opacity: 0.5;
 }
