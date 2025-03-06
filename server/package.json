@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/server.ts"
+    "dev": "nodemon src/server.ts",
+    "start": "node ./dist/server/src/server.js",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +15,6 @@
   "dependencies": {
     "better-sqlite3": "^11.8.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "socket.io": "^4.8.1"
   },
@@ -21,9 +22,9 @@
     "@types/better-sqlite3": "^7.6.12",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.13.2",
+    "@types/node": "^22.13.9",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   }
 }

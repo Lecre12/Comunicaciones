@@ -2,15 +2,12 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
-import dotenv from "dotenv";
 import User from "../../shared/users/user"
 import HandlerDB from "./db-handler/db-handler"
 import path from "path";
 import fs from "fs";
 
 const ALLOWED_TYPES = ["image/svg+xml", "image/png", "image/webp", "image/jpeg"];
-
-dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
