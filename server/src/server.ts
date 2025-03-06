@@ -13,10 +13,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'https://client-chat-adminsys.netlify.app',
-     methods: ['GET', 'POST'],
-     allowedHeaders: ['Content-Type'],
-    },
+    origin: "*",
+  },
   maxHttpBufferSize: 50e3,
 });
 
