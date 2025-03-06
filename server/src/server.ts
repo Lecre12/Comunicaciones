@@ -15,6 +15,7 @@ const io = new Server(server, {
   cors: {
     origin: 'https://client-chat-adminsys.netlify.app',
      methods: ['GET', 'POST'],
+     allowedHeaders: ['Content-Type'],
     },
   maxHttpBufferSize: 50e3,
 });
